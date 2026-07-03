@@ -1,0 +1,6 @@
+python-telegram-bot
+httpx
+requests
+beautifulsoup4
+google-trans-new
+pandas
