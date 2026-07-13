@@ -17,6 +17,11 @@ def add_sport_channel(name, category, description, stream_url, logo_url):
     Returns:
         dict: The created channel data or error message
     """
+    if not _supabase_configured():
+        return {"success": False, "error": "Supabase is not configured."}
+
+    if not _supabase_configured():
+        return {"success": False, "error": "Supabase is not configured."}
     try:
         headers = {
             "apikey": SUPABASE_SERVICE_KEY,
@@ -79,6 +84,8 @@ def update_sport_channel(channel_id, data):
     Returns:
         dict: Success status and message
     """
+    if not _supabase_configured():
+        return {"success": False, "error": "Supabase is not configured."}
     try:
         headers = {
             "apikey": SUPABASE_SERVICE_KEY,
@@ -119,6 +126,8 @@ def delete_sport_channel(channel_id):
     Returns:
         dict: Success status and message
     """
+    if not _supabase_configured():
+        return {"success": False, "error": "Supabase is not configured."}
     try:
         headers = {
             "apikey": SUPABASE_SERVICE_KEY,

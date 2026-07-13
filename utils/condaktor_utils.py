@@ -36,7 +36,7 @@ def get_condaktor_links_by_cat(cat_id):
 def get_condaktor_menu_keyboard():
     """Generate the Condaktor menu keyboard with sports categories"""
     keyboard = [
-        [InlineKeyboardButton("Canlı TV 🛜", web_app={"url": "https://betrewardtv.live/"})]
+        [InlineKeyboardButton("Canlı TV 🛜", url="https://betrewardtv.live/")]
     ]
     return InlineKeyboardMarkup(keyboard)
 

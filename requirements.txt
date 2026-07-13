@@ -1,6 +1,7 @@
-python-telegram-bot
+python-telegram-bot>=20,<22
 httpx
 requests
 beautifulsoup4
 google-trans-new
 pandas
+openpyxl

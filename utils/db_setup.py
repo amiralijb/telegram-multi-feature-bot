@@ -10,6 +10,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import SUPABASE_URL, SUPABASE_SERVICE_KEY
 
+
+def _supabase_configured():
+    return bool(SUPABASE_URL and SUPABASE_SERVICE_KEY)
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +28,8 @@ def check_table_exists():
     Returns:
         bool: True if the table exists, False otherwise
     """
+    if not _supabase_configured():
+        return False
     try:
         headers = {
             "apikey": SUPABASE_SERVICE_KEY,
@@ -51,6 +57,8 @@ def insert_sample_channels():
     Returns:
         bool: True if successful, False otherwise
     """
+    if not _supabase_configured():
+        return False
     headers = {
         "apikey": SUPABASE_SERVICE_KEY,
         "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
@@ -117,7 +125,7 @@ def insert_sample_channels():
         try:
             response = requests.post(
                 f"{SUPABASE_URL}/rest/v1/channels",
-                headers=headers,
+            headers=headers,
                 json=channel
             )
             

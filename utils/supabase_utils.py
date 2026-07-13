@@ -2,10 +2,20 @@ import logging
 import requests
 from config import SUPABASE_URL, SUPABASE_KEY, SUPABASE_SERVICE_KEY
 
+
+def _supabase_configured():
+    return bool(SUPABASE_URL and (SUPABASE_KEY or SUPABASE_SERVICE_KEY))
+
 def get_channels_from_supabase():
     """
     Fetch all TV channels from Supabase database
     """
+    if not _supabase_configured():
+        logging.warning("Supabase is not configured; using fallback channel data.")
+        all_channels = []
+        for category in get_fallback_categories():
+            all_channels.extend(get_sample_channels_for_category(category))
+        return all_channels
     try:
         logging.info(f"Connecting to Supabase at {SUPABASE_URL}")
         headers = {
@@ -44,6 +54,12 @@ def get_channel_by_id(channel_id):
     """
     Fetch a specific channel by ID
     """
+    if not _supabase_configured():
+        for category in get_fallback_categories():
+            for channel in get_sample_channels_for_category(category):
+                if str(channel.get("id")) == str(channel_id):
+                    return channel
+        return None
     try:
         headers = {
             "apikey": SUPABASE_KEY,

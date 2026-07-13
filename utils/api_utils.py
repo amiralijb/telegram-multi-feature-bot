@@ -12,15 +12,20 @@ from config import (
     ODDS_API_KEY
 )
 
+
+
+def _is_configured(*values):
+    return all(bool(v) for v in values)
+
 # -------------------------------
 # توابع مربوط به بازی‌ها
 def get_live_matches_by_id(league_id):
     try:
-        response = requests.get(LIVE_MATCHES_URL)
+        response = requests.get(LIVE_MATCHES_URL, timeout=15)
         data = response.json()
         events = data.get("events")
         if events:
-            filtered = [event for event in events if event.get("idLeague") == league_id]
+            filtered = [event for event in events if str(event.get("idLeague")) == str(league_id)]
             return [f"{event.get('strHomeTeam', 'Bilinmiyor')} VS {event.get('strAwayTeam', 'Bilinmiyor')} - {event.get('strTime', 'Zaman bilinmiyor')} ⏳" for event in filtered]
         return []
     except Exception as e:
@@ -30,7 +35,7 @@ def get_live_matches_by_id(league_id):
 def get_past_matches_by_id(league_id):
     try:
         params = {"id": league_id, "s": "2024-2025"}
-        response = requests.get(PAST_MATCHES_URL, params=params)
+        response = requests.get(PAST_MATCHES_URL, params=params, timeout=15)
         data = response.json()
         if data.get("events"):
             return [f"{m.get('strHomeTeam', 'Bilinmiyor')} {m.get('intHomeScore', '0')} - {m.get('intAwayScore', '0')} {m.get('strAwayTeam', 'Bilinmiyor')}" for m in data["events"]]
@@ -42,7 +47,7 @@ def get_past_matches_by_id(league_id):
 def get_league_table_by_id(league_id, season="2024-2025"):
     try:
         params = {"l": league_id, "s": season}
-        response = requests.get(LEAGUE_TABLE_URL, params=params)
+        response = requests.get(LEAGUE_TABLE_URL, params=params, timeout=15)
         data = response.json()
         if data.get("table"):
             return [f"{team.get('intRank', '?')}. {team.get('strTeam', 'Bilinmiyor')} - Oynanan: {team.get('intPlayed', '?')} | Puan: {team.get('intPoints', '?')}" for team in data["table"]]
@@ -54,7 +59,7 @@ def get_league_table_by_id(league_id, season="2024-2025"):
 def get_todays_matches_by_id(league_id):
     try:
         params = {"id": league_id}
-        response = requests.get(UPCOMING_MATCHES_URL, params=params)
+        response = requests.get(UPCOMING_MATCHES_URL, params=params, timeout=15)
         data = response.json()
         events = data.get("events")
         if events:
@@ -64,7 +69,7 @@ def get_todays_matches_by_id(league_id):
                 date_str = event.get("dateEvent")
                 if date_str:
                     event_date = datetime.strptime(date_str, "%Y-%m-%d")
-                    if 0 <= (event_date - now).days <= 3:
+                    if 0 <= (event_date.date() - now.date()).days <= 3:
                         match_text = f"{event.get('strHomeTeam', 'Bilinmiyor')} VS {event.get('strAwayTeam', 'Bilinmiyor')}"
                         if event.get("strTime"):
                             match_text += f" - Başlangıç: {event.get('strTime')}"
@@ -80,7 +85,7 @@ def get_livescore_from_varzesh3(league_name=None):
     url = "https://www.varzesh3.com/livescore"
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")
         matches = []
@@ -106,7 +111,7 @@ def get_livescore_from_varzesh3(league_name=None):
 def get_highlight_videos():
     try:
         params = {"id": "4328", "s": "2024-2025"}
-        response = requests.get(PAST_MATCHES_URL, params=params)
+        response = requests.get(PAST_MATCHES_URL, params=params, timeout=15)
         data = response.json()
         if data.get("events"):
             highlights = []
@@ -124,6 +129,9 @@ def get_highlight_videos():
         return []
 
 def get_google_search_results(query: str) -> str:
+    if not SERPAPI_KEY:
+        logging.warning("SERPAPI_KEY is not configured; skipping web search.")
+        return "Sonuç bulunamadı."
     url = "https://serpapi.com/search"
     params = {
         "engine": "google",
@@ -132,7 +140,7 @@ def get_google_search_results(query: str) -> str:
         "hl": "tr"
     }
     try:
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, params=params, timeout=15)
         response.raise_for_status()
         data = response.json()
         results = []
@@ -153,6 +161,9 @@ def get_google_search_results(query: str) -> str:
         return "Sonuç bulunamadı."
 
 def get_ai_continuous_answer(history: list) -> str:
+    if not AI_API_KEY:
+        logging.warning("OPENAI_API_KEY is not configured; skipping AI request.")
+        return "❌ Yapay zeka anahtarı tanımlı değil."
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
@@ -163,7 +174,7 @@ def get_ai_continuous_answer(history: list) -> str:
         "messages": history
     }
     try:
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, json=data, timeout=30)
         response.raise_for_status()
         result = response.json()
         answer = result["choices"][0]["message"]["content"]
@@ -173,6 +184,9 @@ def get_ai_continuous_answer(history: list) -> str:
         return "❌ Yapay Zeka'dan cevap alınırken hata oluştu."
 
 def get_football_match_odds(query: str) -> str:
+    if not ODDS_API_KEY:
+        logging.warning("ODDS_API_KEY is not configured; skipping odds lookup.")
+        return None
     url = "https://api.the-odds-api.com/v3/odds"
     params = {
         "apiKey": ODDS_API_KEY,

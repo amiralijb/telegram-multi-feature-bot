@@ -135,7 +135,7 @@ async def handle_channel_selection(update: Update, context: ContextTypes.DEFAULT
             
             # Create buttons for going back and watching on BetReward TV
             buttons = [
-                [InlineKeyboardButton("📺 BetReward TV'de İzle", web_app={"url": "https://betrewardtv.live/"})],
+                [InlineKeyboardButton("📺 BetReward TV'de İzle", url="https://betrewardtv.live/")],
                 [InlineKeyboardButton("🔙 Kanallara Dön", callback_data="sport_tv_back_to_channels")]
             ]
             reply_markup = InlineKeyboardMarkup(buttons)

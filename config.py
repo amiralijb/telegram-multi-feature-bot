@@ -1,27 +1,60 @@
 import os
 
+def _env(name: str, default: str = "") -> str:
+    value = os.getenv(name)
+    return value if value is not None and value != "" else default
+
+def _env_int_list(name: str, default=None):
+    raw = os.getenv(name, "")
+    if not raw:
+        return list(default or [])
+    values = []
+    for item in raw.replace(";", ",").split(","):
+        item = item.strip()
+        if not item:
+            continue
+        try:
+            values.append(int(item))
+        except ValueError:
+            continue
+    return values or list(default or [])
+
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name, "")
+    try:
+        return float(raw) if raw else default
+    except ValueError:
+        return default
+
 # Bot Configuration
-TOKEN = "TOKEN"  
-CHANNEL_USERNAME = "@CHANNEL_USERNAME"  
-ADMIN_IDS = [5224242242454]  
+TOKEN = _env("BOT_TOKEN", _env("TOKEN", "TOKEN"))
+CHANNEL_USERNAME = _env("CHANNEL_USERNAME", "@CHANNEL_USERNAME")
+ADMIN_IDS = _env_int_list("ADMIN_IDS", default=[])
 
 # Referral Configuration
-referral_amount = 3  
+referral_amount = _env_float("REFERRAL_REWARD", 3.0)
 
 # API Keys
-AI_API_KEY = os.getenv("OPENAI_API_KEY")
-SERPAPI_KEY = "SERPAPI_KEY"
-ODDS_API_KEY = "ODDS_API_KEY"
+AI_API_KEY = _env("OPENAI_API_KEY")
+SERPAPI_KEY = _env("SERPAPI_KEY")
+ODDS_API_KEY = _env("ODDS_API_KEY")
 
-LIVESCORE_API_KEY = "LIVESCORE_API_KEY"
-LIVESCORE_API_SECRET = "LIVESCORE_API_SECRET"
-LIVESCORE_COMPETITION_ID = "LIVESCORE_COMPETITION_ID"
+LIVESCORE_API_KEY = _env("LIVESCORE_API_KEY")
+LIVESCORE_API_SECRET = _env("LIVESCORE_API_SECRET")
+LIVESCORE_COMPETITION_ID = _env("LIVESCORE_COMPETITION_ID")
+
+# TheSportsDB / football data endpoints
+THESPORTSDB_API_KEY = _env("THESPORTSDB_API_KEY", "1")
+BASE_API_URL = f"https://www.thesportsdb.com/api/v1/json/{THESPORTSDB_API_KEY}/"
+LIVE_MATCHES_URL = BASE_API_URL + "livescore.php"
+PAST_MATCHES_URL = BASE_API_URL + "eventspastleague.php"
+LEAGUE_TABLE_URL = BASE_API_URL + "lookuptable.php"
+UPCOMING_MATCHES_URL = BASE_API_URL + "eventsnextleague.php"
 
 # Supabase Configuration
-SUPABASE_URL = "SUPABASE_URL"
-SUPABASE_KEY = "SUPABASE_KEY"
-# Alternative service role key if needed
-SUPABASE_SERVICE_KEY = "SUPABASE_SERVICE_KEY"
+SUPABASE_URL = _env("SUPABASE_URL")
+SUPABASE_KEY = _env("SUPABASE_KEY")
+SUPABASE_SERVICE_KEY = _env("SUPABASE_SERVICE_KEY")
 
 # Menu Configuration
 admin_config = {
@@ -36,15 +69,8 @@ admin_config = {
 
 # Storage for user IDs
 user_ids = set()
-user_join_times = {}  
+user_join_times = {}
 referrals = {}
-
-# API URLs
-BASE_API_URL = "SUPABASE_SERVICE_KEY"
-LIVE_MATCHES_URL = BASE_API_URL + "livescore.php"
-PAST_MATCHES_URL = BASE_API_URL + "eventspastleague.php"
-LEAGUE_TABLE_URL = BASE_API_URL + "lookuptable.php"
-UPCOMING_MATCHES_URL = BASE_API_URL + "eventsnextleague.php"
 
 # League Information
 LEAGUES = [
@@ -70,4 +96,4 @@ TODAY_LEAGUES = [
 ]
 
 # Default welcome message
-welcome_message = "🌟 Bot'a hoş geldiniz!" 
+welcome_message = _env("WELCOME_MESSAGE", "🌟 Bot'a hoş geldiniz!")

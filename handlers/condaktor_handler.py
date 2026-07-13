@@ -382,12 +382,12 @@ async def show_condaktor_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
             stream_url = channel.get("stream_url", "")
             
             if stream_url:
-                buttons.append([InlineKeyboardButton(f"📺 {name}", web_app={"url": stream_url})])
+                buttons.append([InlineKeyboardButton(f"📺 {name}", url=stream_url)])
     else:
         # Fallback buttons if no channels in database
         buttons = [
-            [InlineKeyboardButton("🔴 Canlı TV İzle", web_app={"url": "https://betrewardtv.live/"})],
-            [InlineKeyboardButton("🔄 Alternatif Link", web_app={"url": "https://betrewardtv.live/"})]
+            [InlineKeyboardButton("🔴 Canlı TV İzle", url="https://betrewardtv.live/")],
+            [InlineKeyboardButton("🔄 Alternatif Link", url="https://betrewardtv.live/")]
         ]
     
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -420,7 +420,7 @@ async def show_condaktor_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Send web app button (same as in show_canli_yayin_menu)
     web_app_button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📺 CANLI YAYIN İZLE", web_app={"url": "https://betrewardtv.live/"})]
+        [InlineKeyboardButton("📺 CANLI YAYIN İZLE", url="https://betrewardtv.live/")]
     ])
     
     await update.message.reply_text(
@@ -462,7 +462,7 @@ async def condaktor_category_handler(update: Update, context: ContextTypes.DEFAU
 async def show_live_stream_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show the live stream menu with separate columns from Supabase conductors table"""
     # Show loading message
-    if not isinstance(update, CallbackQuery):
+    if update.callback_query is None:
         loading_message = await update.message.reply_text("⏳ Bilgiler yükleniyor, lütfen bekleyin...")
     
     try:
@@ -512,15 +512,15 @@ async def show_live_stream_menu(update: Update, context: ContextTypes.DEFAULT_TY
         
         # Create buttons for BetReward TV
         keyboard = [
-            [InlineKeyboardButton("📺 BetReward TV'de İzle", web_app={"url": "https://betrewardtv.live/"})],
-            [InlineKeyboardButton("📊 Canlı Skorlar", web_app={"url": "https://betrewardtv.live/#skorlar"})],
+            [InlineKeyboardButton("📺 BetReward TV'de İzle", url="https://betrewardtv.live/")],
+            [InlineKeyboardButton("📊 Canlı Skorlar", url="https://betrewardtv.live/#skorlar")],
             [InlineKeyboardButton("🔙 Geri", callback_data="back_to_main")]
         ]
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         # Delete loading message if it exists
-        if not isinstance(update, CallbackQuery) and 'loading_message' in locals():
+        if update.callback_query is None and 'loading_message' in locals():
             try:
                 await context.bot.delete_message(
                     chat_id=update.effective_chat.id,
@@ -530,8 +530,8 @@ async def show_live_stream_menu(update: Update, context: ContextTypes.DEFAULT_TY
                 logging.error(f"Error deleting loading message: {e}")
         
         # Send the message
-        if isinstance(update, CallbackQuery):
-            await update.message.edit_text(
+        if update.callback_query is not None:
+            await update.effective_message.edit_text(
                 text=message,
                 reply_markup=reply_markup,
                 parse_mode="HTML"
@@ -552,13 +552,13 @@ async def show_live_stream_menu(update: Update, context: ContextTypes.DEFAULT_TY
         message += "Bilgiler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.\n\n"
         
         keyboard = [
-            [InlineKeyboardButton("📺 BetReward TV'de İzle", web_app={"url": "https://betrewardtv.live/"})],
+            [InlineKeyboardButton("📺 BetReward TV'de İzle", url="https://betrewardtv.live/")],
             [InlineKeyboardButton("🔙 Geri", callback_data="back_to_main")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        if isinstance(update, CallbackQuery):
-            await update.message.edit_text(
+        if update.callback_query is not None:
+            await update.effective_message.edit_text(
                 text=message,
                 reply_markup=reply_markup,
                 parse_mode="HTML"
@@ -578,7 +578,7 @@ async def show_canli_yayin_menu(update: Update, context: ContextTypes.DEFAULT_TY
     
     # Create a single button that opens the website as a web app
     button = InlineKeyboardMarkup([
-        [InlineKeyboardButton("📺 CANLI YAYIN İZLE", web_app={"url": "https://betrewardtv.live/"})]
+        [InlineKeyboardButton("📺 CANLI YAYIN İZLE", url="https://betrewardtv.live/")]
     ])
     
     # Send the button
@@ -672,7 +672,7 @@ async def handle_konduktor_callback(update: Update, context: ContextTypes.DEFAUL
                                     match_message += f"📊 <b>Durum:</b> {value}\n"
                         
                         # Add watch button
-                        keyboard = [[InlineKeyboardButton("📺 İzle", web_app={"url": "https://betrewardtv.live/"})]]
+                        keyboard = [[InlineKeyboardButton("📺 İzle", url="https://betrewardtv.live/")]]
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         
                         # Send each match as separate message
@@ -704,7 +704,7 @@ async def handle_konduktor_callback(update: Update, context: ContextTypes.DEFAUL
             await query.edit_message_text(
                 "❌ Kondüktör bilgileri alınırken bir hata oluştu.",
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("📺 BetReward TV'de İzle", web_app={"url": "https://betrewardtv.live/"})],
+                    [InlineKeyboardButton("📺 BetReward TV'de İzle", url="https://betrewardtv.live/")],
                     [InlineKeyboardButton("🔙 GERİ DÖN", callback_data="back_to_canli_yayin")]
                 ]),
                 parse_mode="HTML"
@@ -717,7 +717,7 @@ async def handle_konduktor_callback(update: Update, context: ContextTypes.DEFAUL
 async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show the Canlı TV 🛜 menu with separate columns from Supabase conductors table"""
     # Show loading message
-    if not isinstance(update, CallbackQuery):
+    if update.callback_query is None:
         loading_message = await update.message.reply_text("⏳ Bilgiler yükleniyor, lütfen bekleyin...")
     
     try:
@@ -735,7 +735,7 @@ async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         
         # Delete loading message if it exists
-        if not isinstance(update, CallbackQuery) and 'loading_message' in locals():
+        if update.callback_query is None and 'loading_message' in locals():
             try:
                 await context.bot.delete_message(
                     chat_id=update.effective_chat.id,
@@ -745,8 +745,8 @@ async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 logging.error(f"Error deleting loading message: {e}")
         
         # Send header message
-        if isinstance(update, CallbackQuery):
-            await update.message.edit_text(
+        if update.callback_query is not None:
+            await update.effective_message.edit_text(
                 text="📺 <b>Canlı TV 🛜 Menüsü</b>\n\n",
                 parse_mode="HTML"
             )
@@ -809,11 +809,11 @@ async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
                     match_message += f"<a href='https://betrewardtv.live/'>📺 Bu maçı izlemek için tıklayın</a>"
                     
                     # Add button to watch on BetReward TV
-                    keyboard = [[InlineKeyboardButton("📺 İzle", web_app={"url": "https://betrewardtv.live/"})]]
+                    keyboard = [[InlineKeyboardButton("📺 İzle", url="https://betrewardtv.live/")]]
                     reply_markup = InlineKeyboardMarkup(keyboard)
                     
                     # Send each match as separate message
-                    if isinstance(update, CallbackQuery):
+                    if update.callback_query is not None:
                         await update.effective_message.reply_text(
                             text=match_message,
                             reply_markup=reply_markup,
@@ -827,7 +827,7 @@ async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
                         )
             else:
                 # If no matches found
-                if isinstance(update, CallbackQuery):
+                if update.callback_query is not None:
                     await update.effective_message.reply_text(
                         "Maç bilgisi bulunamadı.\n\n",
                         parse_mode="HTML"
@@ -842,7 +842,7 @@ async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         keyboard = [[InlineKeyboardButton("🔙 Geri", callback_data="back_to_main")]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        if isinstance(update, CallbackQuery):
+        if update.callback_query is not None:
             await update.effective_message.reply_text(
                 text="Ana menüye dönmek için:",
                 reply_markup=reply_markup
@@ -863,13 +863,13 @@ async def show_canli_tv_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
         message += "Bilgiler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.\n\n"
         
         keyboard = [
-            [InlineKeyboardButton("📺 BetReward TV'de İzle", web_app={"url": "https://betrewardtv.live/"})],
+            [InlineKeyboardButton("📺 BetReward TV'de İzle", url="https://betrewardtv.live/")],
             [InlineKeyboardButton("🔙 Geri", callback_data="back_to_main")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        if isinstance(update, CallbackQuery):
-            await update.message.edit_text(
+        if update.callback_query is not None:
+            await update.effective_message.edit_text(
                 text=message,
                 reply_markup=reply_markup,
                 parse_mode="HTML"

@@ -35,20 +35,9 @@ _httpxrequest.HTTPXRequest._build_client = patched_build_client
 translator = google_translator()
 
 # -------------------------------
-TOKEN = "TOKEN"  # توکن ربات
-CHANNEL_USERNAME = "@CHANNEL_USERNAME"  # نام کانال (با @)
-ADMIN_IDS = [2312321313131]  # شناسه‌های ادمین
+from config import TOKEN, CHANNEL_USERNAME, ADMIN_IDS, referral_amount, AI_API_KEY, SERPAPI_KEY, ODDS_API_KEY, LIVESCORE_API_KEY, LIVESCORE_API_SECRET, LIVESCORE_COMPETITION_ID, THESPORTSDB_API_KEY
 
-referral_amount = 3  # مبلغ پیش‌فرض ارجاع (TL)
-
-
-AI_API_KEY = os.getenv("OPENAI_API_KEY")
-SERPAPI_KEY = "SERPAPI_KEY"
-ODDS_API_KEY = "ODDS_API_KEY"
-
-LIVESCORE_API_KEY = "LIVESCORE_API_KEY"
-LIVESCORE_API_SECRET = "LIVESCORE_API_SECRET"
-LIVESCORE_COMPETITION_ID = "LIVESCORE_COMPETITION_ID"
+# تنظیمات از config.py بارگذاری می‌شود
 
 # -------------------------------
 # تنظیمات منوی اصلی (با تغییر: اضافه شدن ایموجی به Futbol dünyası)
@@ -69,7 +58,7 @@ referrals = {}
 
 # -------------------------------
 # اطلاعات لیگ‌ها و بازی‌ها
-BASE_API_URL = "BASE_API_URL"
+BASE_API_URL = f"https://www.thesportsdb.com/api/v1/json/{THESPORTSDB_API_KEY}/"
 LIVE_MATCHES_URL = BASE_API_URL + "livescore.php"
 PAST_MATCHES_URL = BASE_API_URL + "eventspastleague.php"
 LEAGUE_TABLE_URL = BASE_API_URL + "lookuptable.php"
@@ -261,7 +250,7 @@ def get_back_keyboard():
 # توابع مربوط به منوی Canlı TV (Condaktor)
 async def show_condaktor_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Canlı TV 🛜", web_app={"url": "https://betrewardtv.live/"})]
+        [InlineKeyboardButton("Canlı TV 🛜", url="https://betrewardtv.live/")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Lütfen aşağıdan seçim yapın:", reply_markup=reply_markup)
